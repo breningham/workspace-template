@@ -1,0 +1,43 @@
+# Workspace Meta-Repository Configuration
+# Available strategies: 'clone' (default) or 'worktree'
+
+repos:
+  # Example 1: Standard microservice (default clone strategy)
+  - name: document-service
+    url: git@github.com:ClickDealer/click-document-service.git
+    branch: main
+    strategy: clone # Optional, implicitly defaults to 'clone'
+    tags:
+      - backend
+      - core
+    description: |
+      Handles document processing and storage validation.
+      Built with TypeScript, utilizing Zod schemas for strict input validation 
+      and deployed via SST v3.
+
+  # Example 2: Massive monorepo (bare-repo worktree strategy)
+  - name: click-apps
+    url: git@github.com:ClickDealer/click-apps.git
+    strategy: worktree
+    worktrees:
+      - main
+      - develop
+      - staging
+    tags:
+      - frontend
+      - monorepo
+    description: |
+      Primary monorepo encompassing Next.js, React, and Tailwind CSS applications.
+      Uses bare-repo worktrees to allow running multiple environments simultaneously 
+      without huge disk overhead.
+
+  # Example 3: Another service targeting a specific active branch
+  - name: feature-flag-service
+    url: git@github.com:ClickDealer/click-feature-flag-service.git
+    branch: develop
+    tags:
+      - backend
+      - internal-tools
+    description: |
+      Internal feature flag toggle service.
+

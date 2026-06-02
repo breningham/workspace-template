@@ -1,0 +1,4 @@
+/*/
+.bare-repos/
+!.scripts
+!repos.yaml
