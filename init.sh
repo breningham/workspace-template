@@ -1,41 +1,39 @@
 #!/bin/bash
+# One-shot initializer: turn a clone of this template into a fresh workspace.
+# Run once, immediately after cloning. It self-destructs at the end.
+set -euo pipefail
 
 echo "Converting template to usable workspace..."
 
-# 1. Setup .gitignore
+# 1. Activate the .gitignore.
 if [ -f .gitignore.example ]; then
     mv .gitignore.example .gitignore
     echo "✅ .gitignore configured."
 else
-    echo "⚠️ .gitignore.example not found."
+    echo "⚠️ .gitignore.example not found (already initialized?)."
 fi
 
-# 2. Generate agents.md for LLM context
-if [ ! -f agents.md ]; then
-    cat << 'EOF' > agents.md
-# LLM Agent Operating Context
-
-## Workspace Structure
-This is a meta-repository managing multiple independent projects.
-- **Architecture:** Polyrepo (no Git submodules).
-- **Configuration:** `repos.yaml` defines the active services and branches.
-- **Editor:** Zed (multi-root workspace launched via `./open.sh`).
-
-## Operational Rules
-1. **Never** modify files inside the hidden `.bare-repos/` directory.
-2. If a new repository needs to be added, update `repos.yaml` and instruct the user to run `./.scripts/setup.sh`.
-3. Keep cross-project documentation and global architecture notes in this root directory, isolated from the service codebases.
-EOF
-    echo "✅ agents.md generated."
+# 2. Point the code-review-graph MCP server at this workspace.
+#    .opencode.json ships with a placeholder cwd; bake in the absolute path.
+if [ -f .opencode.json ]; then
+    if command -v sed >/dev/null 2>&1; then
+        sed -i.bak "s#__WORKSPACE_DIR__#$(pwd)#g" .opencode.json && rm -f .opencode.json.bak
+        echo "✅ .opencode.json pointed at $(pwd)."
+    fi
 fi
 
-# 3. Reset Git history for the new project
+# 3. The agent-instruction symlinks (CLAUDE.md, GEMINI.md,
+#    .github/copilot-instructions.md → AGENTS.md) are committed in the template,
+#    so there's nothing to generate here — just edit AGENTS.md for your workspace.
+
+# 4. Reset Git history for the new project.
 if [ -d .git ]; then
     rm -rf .git
-    git init
+    git init -q
     echo "✅ Initialized fresh Git repository."
 fi
 
-# 4. Self-destruct
+# 5. Self-destruct.
 echo "✅ Initialization complete."
+echo "ℹ️  Next: edit repos.yaml, then run 'mise run setup' to bootstrap your repos."
 rm -- "$0"

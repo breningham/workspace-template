@@ -1,4 +1,14 @@
+# Ignore every cloned repo / worktree directory at the workspace root — the
+# shell only tracks its own tooling, never the production codebases.
 /*/
+# ...but keep the workspace shell's own directories.
+!.scripts/
+!.github/
+
+# Git's internal bare-repo storage for `strategy: worktree` repos.
 .bare-repos/
-!.scripts
-!repos.yaml
+
+# code-review-graph index (also written inside each cloned repo).
+.code-review-graph/
+
+.DS_Store
