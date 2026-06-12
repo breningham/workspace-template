@@ -11,6 +11,19 @@ fi
 pushd "$TARGET_DIR" > /dev/null || exit 1
 echo "  ⚡ Running post-setup automation..."
 
+# Context exported for setup_commands. REPO_NAME is the repos.yaml name;
+# IS_PRIMARY_CHECKOUT is 1 for clones and for a worktree repo's first listed
+# worktree, else 0 — so once-per-repo work (e.g. graph indexing) doesn't run
+# once per worktree.
+export REPO_NAME
+_strategy=$(yq ".repos[] | select(.name == \"$REPO_NAME\") | .strategy // \"clone\"" "$YAML_FILE")
+if [ "$_strategy" = "worktree" ]; then
+    _first_wt=$(yq ".repos[] | select(.name == \"$REPO_NAME\") | .worktrees[0]" "$YAML_FILE")
+    [ "$(basename "$PWD")" = "$_first_wt" ] && export IS_PRIMARY_CHECKOUT=1 || export IS_PRIMARY_CHECKOUT=0
+else
+    export IS_PRIMARY_CHECKOUT=1
+fi
+
 # 0. global.setup_commands — run in every repo, before its own commands.
 if yq ".global | has(\"setup_commands\")" "$YAML_FILE" 2>/dev/null | grep -q "true"; then
     GLOBAL_LIST=$(mktemp)
