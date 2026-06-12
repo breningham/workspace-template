@@ -36,6 +36,9 @@ tasks** that wrap the scripts in `.scripts/`.
 | Task | What it does |
 |------|--------------|
 | `mise run setup` | Bootstrap every repo/worktree in `repos.yaml` (idempotent — skips existing). Append a tag for a subset, e.g. `mise run setup -- backend`. |
+| `mise run add <url>` | Add a new repo to `repos.yaml` and check it out. Prompts for name/description/branch/setup-commands (skip each with `--name`/`--description`/`--defaultBranch`/`--setupCommands`, or `--yes` for all defaults). |
+| `mise run rm <name>` | Remove a repo from `repos.yaml`, delete its checkout, and unregister it from the graph (`--keep-files` to drop the entry only). |
+| `mise run status` | One-screen overview: branch, dirty/clean, sync vs upstream, graph-indexed, plus drift. |
 | `mise run open` | Launch the multi-root workspace in Zed for all cloned repos/worktrees. |
 | `mise run wt add <repo> <branch>` | Add a worktree (only for `strategy: worktree` repos). Resolves local → remote → new-off-`main`, then runs that repo's `setup_commands`. |
 | `mise run wt rm <repo> <branch>` | Remove a worktree and its local branch. |

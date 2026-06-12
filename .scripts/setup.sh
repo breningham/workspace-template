@@ -1,7 +1,8 @@
 #!/bin/bash
 YAML_FILE="$(pwd)/repos.yaml"
 BARE_DIR="$(pwd)/.bare-repos"
-TARGET_TAG=$1
+# mise passes the [tag] arg as usage_tag; fall back to $1 for direct invocation.
+TARGET_TAG="${usage_tag:-${1:-}}"
 
 if [ ! -f "$YAML_FILE" ]; then
     echo "❌ repos.yaml not found."

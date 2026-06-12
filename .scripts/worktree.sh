@@ -1,12 +1,16 @@
 #!/bin/bash
 YAML_FILE="repos.yaml"
 BARE_DIR=".bare-repos"
-COMMAND=$1
+# mise passes <command> [repo] [branch] as usage_* vars; fall back to $1..$3
+# for direct ./.scripts/worktree.sh invocation.
+COMMAND="${usage_command:-${1:-}}"
+ARG_REPO="${usage_repo:-${2:-}}"
+ARG_BRANCH="${usage_branch:-${3:-}}"
 
 case "$COMMAND" in
     add)
-            REPO=$2
-            BRANCH=$3
+            REPO=$ARG_REPO
+            BRANCH=$ARG_BRANCH
 
             if [ -z "$REPO" ] || [ -z "$BRANCH" ]; then
                 echo "❌ Usage: mise run wt add <repo-name> <branch-name>"
@@ -50,8 +54,8 @@ case "$COMMAND" in
             echo "✅ Worktree is fully provisioned."
             ;;
     rm)
-        REPO=$2
-        BRANCH=$3
+        REPO=$ARG_REPO
+        BRANCH=$ARG_BRANCH
 
         if [ -z "$REPO" ] || [ -z "$BRANCH" ]; then
             echo "❌ Usage: mise run wt rm <repo-name> <branch-name>"
