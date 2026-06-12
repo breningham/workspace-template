@@ -1,0 +1,36 @@
+[tools]
+# The workspace shell itself only needs these; each cloned repo pins its own
+# toolchain via its own mise.toml / setup_commands.
+node = "24"
+yq = "latest"
+prettier = "latest"
+# Drives the cross-repo code graph (register/build in repos.yaml + the graph task).
+"pipx:code-review-graph" = "2.3.3"
+
+[tasks.setup]
+description = "Bootstrap all repositories and worktrees defined in repos.yaml (optional tag filter: mise run setup -- backend)"
+run = "./.scripts/setup.sh"
+
+[tasks.open]
+description = "Launch the multi-root workspace in Zed"
+run = "./.scripts/open.sh"
+
+[tasks.wt]
+description = "Manage workspace worktrees (subcommands: add, rm, prune)"
+run = "./.scripts/worktree.sh"
+
+[tasks.update]
+description = "Pull latest (ff-only) for every repo/worktree (optional tag filter: mise run update backend)"
+run = "./.scripts/update.sh"
+
+[tasks.each]
+description = "Run a command in every repo/worktree (e.g. mise run each -- git status -s)"
+run = "./.scripts/each.sh"
+
+[tasks.graph]
+description = "Manage the code-review-graph index (subcommands: build, refresh, status, daemon)"
+run = "./.scripts/graph.sh"
+
+[tasks.format]
+description = "Format the workspace shell with Prettier"
+run = "prettier --write ."

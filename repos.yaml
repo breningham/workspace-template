@@ -1,5 +1,17 @@
 # Workspace Meta-Repository Configuration
-# Available strategies: 'clone' (default) or 'worktree'
+# Source of truth for the local polyrepo workspace. Edit this, then run:
+#   mise run setup            Bootstrap everything (idempotent)
+#   mise run setup -- backend Only repos tagged 'backend'
+#
+# Available strategies: 'clone' (default) or 'worktree'.
+
+# Commands run inside every repo after it is first checked out, before its own
+# `setup_commands`. Used here to register each repo into the cross-repo code
+# graph. Remove this block if you don't use code-review-graph.
+global:
+  setup_commands:
+    - code-review-graph register . --alias $(basename $(pwd))
+    - code-review-graph build
 
 repos:
   # Example 1: Standard microservice (default clone strategy)
@@ -12,8 +24,14 @@ repos:
       - core
     description: |
       Handles document processing and storage validation.
-      Built with TypeScript, utilizing Zod schemas for strict input validation 
+      Built with TypeScript, utilizing Zod schemas for strict input validation
       and deployed via SST v3.
+    # Per-repo automation runs inside the repo after checkout (e.g. pin a
+    # toolchain, install deps). Both `setup_commands` (array) and
+    # `setup_command` (string) are supported.
+    setup_commands:
+      - mise use node@24
+      - npm install
 
   # Example 2: Massive monorepo (bare-repo worktree strategy)
   - name: click-apps
@@ -28,7 +46,7 @@ repos:
       - monorepo
     description: |
       Primary monorepo encompassing Next.js, React, and Tailwind CSS applications.
-      Uses bare-repo worktrees to allow running multiple environments simultaneously 
+      Uses bare-repo worktrees to allow running multiple environments simultaneously
       without huge disk overhead.
 
   # Example 3: Another service targeting a specific active branch
@@ -40,4 +58,3 @@ repos:
       - internal-tools
     description: |
       Internal feature flag toggle service.
-
