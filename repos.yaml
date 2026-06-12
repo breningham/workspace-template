@@ -10,8 +10,10 @@
 # graph. Remove this block if you don't use code-review-graph.
 global:
   setup_commands:
-    - code-review-graph register . --alias $(basename $(pwd))
-    - code-review-graph build
+    # Index each repo into the code graph exactly once: clones always, worktree
+    # repos only on their first listed worktree. REPO_NAME / IS_PRIMARY_CHECKOUT
+    # are exported by .scripts/_run-commands.sh.
+    - '[ ${IS_PRIMARY_CHECKOUT:-1} = 1 ] && code-review-graph register . --alias $REPO_NAME && code-review-graph build || true'
 
 repos:
   # Example 1: Standard microservice (default clone strategy)
