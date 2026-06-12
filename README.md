@@ -44,12 +44,47 @@ Ensure the following are installed on your system:
 | Task | What it does |
 |------|--------------|
 | `mise run setup` | Bootstrap every repo/worktree in `repos.yaml` (idempotent). Tag filter: `mise run setup -- backend`. |
+| `mise run add <url>` | Add a new repo to `repos.yaml` and check it out (prompts, all skippable via flags). |
+| `mise run rm <name>` | Remove a repo from `repos.yaml` and delete its checkout. |
+| `mise run status` | Branch / dirty / sync / graph status for every repo, plus drift. |
 | `mise run open` | Launch the multi-root workspace in Zed. |
 | `mise run wt add\|rm\|prune` | Manage `strategy: worktree` worktrees. |
 | `mise run update` | `git pull --ff-only` every repo/worktree (optional tag filter). |
 | `mise run each -- <cmd>` | Run a command in every checked-out repo/worktree. |
 | `mise run graph build\|refresh\|status\|daemon` | Manage the cross-repo code graph. |
 | `mise run format` | Prettier across the shell repo. |
+
+### Adding a repo
+
+```bash
+mise run add git@github.com:ClickDealer/click-foo-service.git
+# …or fully non-interactive:
+mise run add <url> --name foo --defaultBranch develop \
+  --description "…" --setupCommands="npm install, npm run build" --tags "backend,core"
+```
+
+It appends a valid entry to `repos.yaml` (description defaults to the repo's
+GitHub description via `gh`), then clones and runs the post-checkout hook.
+
+## Shell completions (zsh / fish)
+
+The tasks ship [`usage`](https://usage.jdx.dev) specs, so mise can complete task
+names **and** their arguments — `mise run rm <TAB>` lists repo names, `mise run
+setup <TAB>` lists tags. The `usage` CLI (pinned in `mise.toml`) powers this;
+`mise install` provides it.
+
+Enable mise's completions once per shell:
+
+```bash
+# zsh — ensure the dir is on your fpath, then reload
+mkdir -p ~/.config/zsh/completions
+mise completion zsh > ~/.config/zsh/completions/_mise
+
+# fish
+mise completion fish > ~/.config/fish/completions/mise.fish
+```
+
+(See `mise completion --help` for bash and other shells.)
 
 ## Configuration (`repos.yaml`)
 

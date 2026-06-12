@@ -6,9 +6,43 @@ yq = "latest"
 prettier = "latest"
 # Drives the cross-repo code graph (register/build in repos.yaml + the graph task).
 "pipx:code-review-graph" = "2.3.3"
+# Powers shell completions for the tasks below (mise delegates to `usage`).
+"ubi:jdx/usage" = "latest"
+
+[tasks.add]
+description = "Add a new repo to repos.yaml and check it out"
+usage = '''
+arg "<url>" help="Remote git URL (SSH or HTTPS)"
+flag "--name <name>" help="Local directory name (default: basename of url)"
+flag "--description <description>" help="Description (default: GitHub's, via gh)"
+flag "--defaultBranch <branch>" help="Branch to track (default: main)"
+flag "--setupCommands <cmds>" help="Comma-separated post-checkout commands"
+flag "--tags <tags>" help="Comma-separated grouping tags"
+flag "--no-clone" help="Only edit repos.yaml; don't clone"
+flag "-y --yes" help="Accept all defaults; no prompts"
+'''
+run = "./.scripts/add.sh"
+
+[tasks.rm]
+description = "Remove a repo from repos.yaml and delete its checkout"
+usage = '''
+arg "<name>" help="Repo name (as in repos.yaml)"
+complete "name" run="yq '.repos[].name' repos.yaml"
+flag "-y --yes" help="Skip the confirmation prompt"
+flag "--keep-files" help="Drop the repos.yaml entry only; keep files"
+'''
+run = "./.scripts/rm.sh"
+
+[tasks.status]
+description = "Show branch / dirty / sync / graph status for every repo"
+run = "./.scripts/status.sh"
 
 [tasks.setup]
 description = "Bootstrap all repositories and worktrees defined in repos.yaml (optional tag filter: mise run setup -- backend)"
+usage = '''
+arg "[tag]" help="Only bootstrap repos with this tag"
+complete "tag" run="yq '.repos[].tags[]' repos.yaml | sort -u"
+'''
 run = "./.scripts/setup.sh"
 
 [tasks.open]
@@ -17,10 +51,20 @@ run = "./.scripts/open.sh"
 
 [tasks.wt]
 description = "Manage workspace worktrees (subcommands: add, rm, prune)"
+usage = '''
+arg "<command>" help="add | rm | prune"
+arg "[repo]" help="Worktree-strategy repo"
+arg "[branch]" help="Branch name"
+complete "repo" run="yq '.repos[] | select(.strategy == \"worktree\") | .name' repos.yaml"
+'''
 run = "./.scripts/worktree.sh"
 
 [tasks.update]
 description = "Pull latest (ff-only) for every repo/worktree (optional tag filter: mise run update backend)"
+usage = '''
+arg "[tag]" help="Only update repos with this tag"
+complete "tag" run="yq '.repos[].tags[]' repos.yaml | sort -u"
+'''
 run = "./.scripts/update.sh"
 
 [tasks.each]
@@ -28,6 +72,9 @@ description = "Run a command in every repo/worktree (e.g. mise run each -- git s
 run = "./.scripts/each.sh"
 
 [tasks.graph]
+# No usage spec here on purpose: graph forwards multi-level subcommands
+# (e.g. `graph daemon start`) straight through as $@, which a usage spec would
+# capture and break.
 description = "Manage the code-review-graph index (subcommands: build, refresh, status, daemon)"
 run = "./.scripts/graph.sh"
 
